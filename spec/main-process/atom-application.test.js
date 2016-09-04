@@ -191,11 +191,12 @@ describe('AtomApplication', function () {
       const atomApplication = buildAtomApplication()
       const window1 = atomApplication.launch(parseCommandLine([path.join(tempDirPath, 'new-file')]))
       await focusWindow(window1)
+      await new Promise(resolve => setTimeout(resolve, 1000))
       await evalInWebContents(window1.browserWindow.webContents, function (sendBackToMainProcess) {
         atom.workspace.observeActivePaneItem(function (textEditor) {
           if (textEditor) {
-            textEditor.onDidStopChanging(() => sendBackToMainProcess(null))
             textEditor.insertText('Hello World!')
+            sendBackToMainProcess(null)
           }
         })
       })

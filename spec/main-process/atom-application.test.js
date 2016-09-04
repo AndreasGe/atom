@@ -190,11 +190,12 @@ describe('AtomApplication', function () {
       const tempDirPath = makeTempDir()
       const atomApplication = buildAtomApplication()
       const window1 = atomApplication.launch(parseCommandLine([path.join(tempDirPath, 'new-file')]))
+      await focusWindow(window1)
       await evalInWebContents(window1.browserWindow.webContents, function (sendBackToMainProcess) {
         atom.workspace.observeActivePaneItem(function (textEditor) {
           if (textEditor) {
+            textEditor.onDidStopChanging(() => sendBackToMainProcess(null))
             textEditor.insertText('Hello World!')
-            sendBackToMainProcess(null)
           }
         })
       })
@@ -202,6 +203,7 @@ describe('AtomApplication', function () {
       await window1.closedPromise
 
       const window2 = atomApplication.launch(parseCommandLine([path.join(tempDirPath)]))
+      await focusWindow(window2)
       const window2Text = await evalInWebContents(window2.browserWindow.webContents, function (sendBackToMainProcess) {
         atom.workspace.observeActivePaneItem(function (textEditor) {
           if (textEditor) sendBackToMainProcess(textEditor.getText())
